@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "chatgpt-local-files",
+  "version": "0.1.0",
+  "description": "Use connected local-file MCP tools with version checks and recoverable changes.",
+  "repository": "https://github.com/alice840126-ship-it/chatgpt-local-files",
+  "license": "MIT"
+}

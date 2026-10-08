@@ -1,0 +1,4 @@
+interface:
+  display_name: "ChatGPT Local Files"
+  short_description: "연결된 MCP로 로컬 파일을 읽고 수정하며 변경 이력과 복구를 확인합니다"
+  default_prompt: "$chatgpt-local-files로 요청한 로컬 파일을 읽고 수정한 뒤 실제 저장 결과를 검증해줘."
