@@ -232,11 +232,11 @@ class Filesystem:
             fail('version_conflict', 'Re-read the current file, merge intended edits, and retry with its new version.', current=actual)
         return actual
 
-    def call(self, action, **arguments):
+    def call(self, operation, **arguments):
         self.active = None
         try:
             with self.locked():
-                return getattr(self, action)(**arguments)
+                return getattr(self, operation)(**arguments)
         except FileError as exc:
             result = exc.result
         except BlockingIOError:
@@ -511,9 +511,9 @@ class Filesystem:
         fail('restore_not_supported', 'Use history and the retained recovery object for this operation.')
 
 
-def register_tools(server, state):
+def register_tools(server, state, filesystem=None):
     from mcp.types import ToolAnnotations
-    filesystem = Filesystem(state)
+    filesystem = filesystem or Filesystem(state)
     read = ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=False)
     create = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=False)
     change = ToolAnnotations(readOnlyHint=False, destructiveHint=True, openWorldHint=False)

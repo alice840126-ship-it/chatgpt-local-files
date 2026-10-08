@@ -192,7 +192,7 @@ class FilesystemTests(unittest.TestCase):
         async def run():
             async with Client(create_server(self.root/'state')) as client:
                 listed=(await client.list_tools()).tools
-                self.assertEqual(len(listed),14)
+                self.assertEqual(len(listed),26)
                 self.assertTrue(next(t for t in listed if t.name=='local_file_write').annotations.destructive_hint)
                 create=await client.call_tool('local_file_create',{'path':str(self.path),'content':'first'})
                 data=create.structured_content

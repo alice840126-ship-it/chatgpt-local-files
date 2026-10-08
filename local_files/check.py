@@ -13,7 +13,7 @@ async def check(root: Path) -> dict:
 
     server = StdioServerParameters(
         command=sys.executable,
-        args=['-m', 'local_files.server', '--state', str(root / 'state')],
+        args=['-m', 'local_files.server', '--state', str(root / 'state'), '--execution'],
         cwd=str(root),
     )
     async with Client(server) as client:
@@ -22,7 +22,10 @@ async def check(root: Path) -> dict:
                     'local_directory_create', 'local_file_copy', 'local_file_move',
                     'local_file_delete', 'local_file_restore', 'local_file_stat',
                     'local_file_read', 'local_file_search', 'local_file_history',
-                    'local_file_diff', 'local_files_status'}
+                    'local_file_diff', 'local_files_status', 'local_directory_list',
+                    'local_write_begin', 'local_write_chunk', 'local_write_status', 'local_write_commit',
+                    'local_write_abort', 'local_document_read', 'local_docx_create', 'local_docx_replace',
+                    'local_spreadsheet_write', 'local_pdf_select_pages', 'local_image_preview', 'local_program_run'}
         if set(names) != expected:
             raise RuntimeError('Unexpected MCP tool inventory')
 
@@ -40,7 +43,7 @@ async def check(root: Path) -> dict:
                 raise RuntimeError(label)
 
         status = await call('local_files_status')
-        require(status.get('tools') == 14 and status.get('permission_verified') is False,
+        require(status.get('tools') == 27 and status.get('permission_verified') is False,
                 'Scope reporting must not claim permission verification')
         path = str(root / 'sample.txt')
         created = await call('local_file_create', path=path, content='first')

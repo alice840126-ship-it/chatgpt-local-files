@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "chatgpt-local-files"
-version = "0.1.0"
+version = "0.2.0"
 description = "Recoverable local file operations for ChatGPT through an authenticated MCP tunnel"
 requires-python = ">=3.11"
 license = "MIT"
-dependencies = ["mcp==2.2.0"]
+dependencies = ["mcp==2.2.0", "pypdf==6.19.0", "python-docx==1.2.0", "openpyxl==3.1.5", "Pillow==12.3.0"]
 
 [project.scripts]
 chatgpt-local-files = "local_files.server:main"

@@ -1,6 +1,6 @@
 ---
 name: chatgpt-local-files
-description: 연결된 로컬 파일 MCP로 사용자 컴퓨터의 파일을 검색하고 원문을 읽거나 생성·수정·이동·삭제·복구할 때 사용한다.
+description: 연결된 로컬 파일 MCP로 사용자 컴퓨터의 파일을 검색하고 원문을 읽거나 생성·수정·이동·삭제·복구하거나 문서 처리와 승인된 프로그램 실행을 할 때 사용한다.
 ---
 
 # ChatGPT Local Files
@@ -13,8 +13,16 @@ description: 연결된 로컬 파일 MCP로 사용자 컴퓨터의 파일을 검
 - 작은 텍스트 수정은 전체 파일 재작성보다 `local_file_edit`로 필요한 유일한 구간을 바꾼다.
 - 기존 파일을 변경할 때 읽기/상태 조회의 최신 `version`을 `expected_version`으로 전달한다. 충돌이면 다시 읽고 병합한다. 새 파일은 `local_file_create`로 만들며 기존 대상을 강제로 덮어쓰지 않는다.
 - 일반 수정은 요청 범위에서 진행한다. 대량 삭제가 `confirmation_required`를 반환하면 정확한 대상·항목 수·용량을 보여주고 사람의 확인 뒤 해당 토큰으로 재호출한다. 스스로 `user_confirmed=true`를 추정하지 않는다.
-- 페이지를 이어 읽을 때 반환된 바이트 위치 `next_offset`을 사용한다. 바이너리는 base64로 다루며 PDF 내용 추출·이미지 이해가 되는 것처럼 주장하지 않는다.
+- 페이지를 이어 읽을 때 반환된 바이트 위치 `next_offset`을 사용한다. 바이너리는 base64로 다룬다. PDF·Word·Excel은 `local_document_read`, 이미지는 `local_image_preview`를 사용한다. 스캔 PDF 텍스트가 없으면 OCR이 필요하다고 알린다.
 - 결과의 `verified`와 실제 재읽기로 성공을 확인한다. 작업 ID를 남겨 차이 조회·복구에 사용한다. `prepared`, `inspect_required`, `commit_race_preserved`는 현재 파일과 보존본을 확인해야 한다.
 - 복구도 현재 버전을 확인한다. 오류의 원인과 `recovery` 안내를 전달한다. 권한 오류를 관리자 실행이나 보호 해제로 우회하지 않는다.
 
 스킬 설치는 MCP 연결을 대신하지 않는다. 설치·터널·OS 권한 설정은 [설치 안내](https://github.com/alice840126-ship-it/chatgpt-local-files/blob/main/docs/SETUP.md), 도구 범위·제한은 [도구 설명](https://github.com/alice840126-ship-it/chatgpt-local-files/blob/main/docs/TOOLS.md)를 참고한다.
+
+## 문서·대용량·실행
+
+- 8 MiB가 넘는 새 내용은 분할 업로드를 시작하고 조각별 `next_offset`을 기록한다. 중단 후 상태를 조회하며 최종 commit 전에는 대상 저장 완료라고 말하지 않는다.
+- Word는 유일한 서식 구간을 수정하며 모호한 구간을 강제로 바꾸지 않는다. Excel은 범위와 셀 주소를 명시하고 수식은 계산되지 않는다고 구분한다. PDF 페이지 선택은 서명·메타데이터 영향이 있으므로 요청 범위를 설명한다.
+- `local_program_run`이 활성화되어 있고 사용자가 실행 목적을 승인했을 때 프로그램을 사용한다. Python은 상태 도구에 나온 현재 서버 환경 등 검증된 절대경로를 사용한다. 다른 런타임의 인증·환경을 가져오지 않는다.
+- 프로그램 실행은 파일 변경·네트워크 등 외부 효과를 낼 수 있다. 파괴적 명령·게시·전송·결제는 해당 사용자 승인 없이 실행하지 않는다. 복구 가능한 파일 도구를 우선하고 삭제 확인을 명령 실행으로 우회하지 않는다.
+- 종료 코드 0은 파일 결과 검증이 아니다. intended 파일을 실제 읽고 실행의 변경·복구 한계를 보고한다. 불확실한 실행은 무조건 재시도하지 말고 실제 파일·이력을 확인한다.
